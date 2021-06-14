@@ -4,6 +4,7 @@ const {
   createCategoryData,
   createUserData,
   createReviewData,
+  createCommentData,
 } = require("../utils/data-manipulation");
 
 const seed = (data) => {
@@ -95,6 +96,14 @@ const seed = (data) => {
       );
       //console.log(insertReviews);
       return db.query(insertReviews);
+    })
+    .then((result) => console.table(result.rows))
+    .then(() => {
+      const insertComments = format(
+        `INSERT INTO comments(comment_id, author, review_id) VALUES %L RETURNING *;`,
+        createCommentData(commentData)
+      );
+      return db.query(insertComments);
     })
     .then((result) => console.table(result.rows));
 };

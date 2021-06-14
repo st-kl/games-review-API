@@ -2,9 +2,10 @@ const {
   createCategoryData,
   createUserData,
   createReviewData,
+  createCommentData,
 } = require("../db/utils/data-manipulation");
 
-describe("create category data", () => {
+describe("Create category data", () => {
   test("returns an empty array when passed empty array", () => {
     expect(createCategoryData([])).toEqual([]);
   });
@@ -71,6 +72,18 @@ describe("Create review data", () => {
         "Mine",
         new Date(1610964020514),
       ],
+    ]);
+  });
+});
+describe("Create comment data", () => {
+  test("returns array of comment data", () => {
+    const originalArray = [
+      { author: "Thranduil", review_id: 4 },
+      { author: "Arwen", review_id: 9 },
+    ];
+    expect(createCommentData(originalArray)).toEqual([
+      ["Thranduil", 4],
+      ["Arwen", 9],
     ]);
   });
 });
