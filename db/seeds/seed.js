@@ -1,7 +1,10 @@
 const db = require("../connection");
 const format = require("pg-format");
-const { createCategoryData } = require("../utils/data-manipulation");
-const { createTestScheduler } = require("jest");
+const {
+  createCategoryData,
+  createUserData,
+  createReviewData,
+} = require("../utils/data-manipulation");
 
 const seed = (data) => {
   const { categoryData, commentData, reviewData, userData } = data;
@@ -36,18 +39,21 @@ const seed = (data) => {
     })
     .then(() => {
       return db.query(`
-        CREATE TABLE reviews (
-          review_id SERIAL PRIMARY KEY,
-          title VARCHAR(50) NOT NULL,
-          review_body TEXT NOT NULL,
-          designer VARCHAR(50) NOT NULL,
-          review_img_url TEXT DEFAULT 'https://images.pexels.com/photos/163064/play-stone-network-networked-interactive-163064.jpeg',
-          votes INT DEFAULT 0,
-          category VARCHAR(50) REFERENCES categories(slug) NOT NULL,
-          owner VARCHAR(50) REFERENCES users(username) NOT NULL,
-          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      CREATE TABLE reviews(
+        review_id SERIAL PRIMARY KEY,
+        title VARCHAR(250) NOT NULL,
+        designer VARCHAR(250) NOT NULL,
+        owner VARCHAR(200) REFERENCES users(username),
+        review_img_url VARCHAR(5000) DEFAULT 'https://images.pexels.com/photos/163064/play-stone-network-networked-interactive-163064.jpeg',
+        review_body VARCHAR(5000) NOT NULL,
+        category VARCHAR(200) REFERENCES categories(slug),
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, 
+        votes INT DEFAULT 0
+      
+      
       );`);
     })
+
     .then(() => {
       return db.query(`
     CREATE TABLE comments (
@@ -69,6 +75,26 @@ const seed = (data) => {
         createCategoryData(categoryData)
       );
       return db.query(insertCategories);
+    })
+    .then(() => {
+      const insertUsers = format(
+        `
+      INSERT INTO users 
+      (username, avatar_url, name) 
+      VALUES %L
+      RETURNING *;`,
+        createUserData(userData)
+      );
+
+      return db.query(insertUsers);
+    })
+    .then(() => {
+      const insertReviews = format(
+        `INSERT INTO reviews(title, designer, owner, review_body, created_at, category, votes, review_img_url) VALUES %L RETURNING *;`,
+        createReviewData(reviewData)
+      );
+      //console.log(insertReviews);
+      return db.query(insertReviews);
     })
     .then((result) => console.table(result.rows));
 };
