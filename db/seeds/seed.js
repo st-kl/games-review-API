@@ -1,5 +1,7 @@
-const db = require('../connection');
-const format = require('pg-format');
+const db = require("../connection");
+const format = require("pg-format");
+const { createCategoryData } = require("../utils/data-manipulation");
+const { createTestScheduler } = require("jest");
 
 const seed = (data) => {
   const { categoryData, commentData, reviewData, userData } = data;
@@ -7,15 +9,15 @@ const seed = (data) => {
   //
   // 2. insert data
   return db
-    .query('DROP TABLE IF EXISTS comments;')
+    .query("DROP TABLE IF EXISTS comments;")
     .then(() => {
-      return db.query('DROP TABLE IF EXISTS reviews;');
+      return db.query("DROP TABLE IF EXISTS reviews;");
     })
     .then(() => {
-      return db.query('DROP TABLE IF EXISTS users;');
+      return db.query("DROP TABLE IF EXISTS users;");
     })
     .then(() => {
-      return db.query('DROP TABLE IF EXISTS categories;');
+      return db.query("DROP TABLE IF EXISTS categories;");
     })
     .then(() => {
       return db.query(`
@@ -56,7 +58,19 @@ const seed = (data) => {
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       body TEXT NOT NULL
     );`);
-    });
+    })
+    .then(() => {
+      const insertCategories = format(
+        `
+      INSERT INTO categories 
+      (slug, description) 
+      VALUES %L
+      RETURNING *;`,
+        createCategoryData(categoryData)
+      );
+      return db.query(insertCategories);
+    })
+    .then((result) => console.table(result.rows));
 };
 
 module.exports = seed;
