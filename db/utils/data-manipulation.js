@@ -1,28 +1,26 @@
-// extract any functions you are using to manipulate your data, into this file
-
-exports.createCategoryData = (array) => {
-  return array.map((category) => {
+exports.createCategoryData = (categoryData) => {
+  return categoryData.map((category) => {
     return [category.slug, category.description];
   });
 };
 
-exports.createUserData = (array) => {
-  return array.map((user) => {
+exports.createUserData = (userData) => {
+  return userData.map((user) => {
     return [user.username, user.avatar_url, user.name];
   });
 };
 
-exports.createReviewData = (array) => {
-  return array.map((review) => {
+exports.createReviewData = (reviewData) => {
+  return reviewData.map((review) => {
     return [
       review.title,
       review.designer,
       review.owner,
-      review.review_body,
-      review.created_at,
-      review.category,
-      review.votes,
       review.review_img_url,
+      review.review_body,
+      review.category,
+      review.created_at,
+      review.votes,
     ];
   });
 };
