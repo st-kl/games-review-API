@@ -25,8 +25,8 @@ exports.createReviewData = (reviewData) => {
   });
 };
 
-/* exports.createCommentData = (array) => {
-    return array.map((comment) => {
-      return [comment.comment_id, comment.author, comment.review_id, ];
-    });
-  }; */
+exports.createCommentData = (array) => {
+  return array.map((comment) => {
+    return [comment.author, comment.review_id];
+  });
+};
