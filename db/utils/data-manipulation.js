@@ -26,14 +26,27 @@ exports.createReviewData = (reviewData) => {
   });
 };
 
-exports.createCommentData = (array) => {
+exports.createCommentData = (array, dic) => {
   return array.map((comment) => {
+    let revRef = dic[comment.belongs_to];
     return [
-      comment.body,
-      comment.belongs_to,
       comment.created_by,
+      revRef,
       comment.votes,
       comment.created_at,
+      comment.body,
     ];
   });
+};
+
+exports.createRevRef = (array) => {
+  const dic = {};
+
+  if (array.length !== 0) {
+    for (const comment of array) {
+      dic[comment.title] = comment.review_id;
+    }
+  }
+
+  return dic;
 };

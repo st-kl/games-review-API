@@ -3,6 +3,7 @@ const {
   createUserData,
   createReviewData,
   createCommentData,
+  createRevRef,
 } = require('../db/utils/data-manipulation');
 
 describe('CREATE COLUMN VALUES', () => {
@@ -103,7 +104,7 @@ describe('CREATE COLUMN VALUES', () => {
     });
   });
 
-  describe('comment data', () => {
+  describe.only('comment data', () => {
     it('returns array of comment data', () => {
       const originalArray = [
         {
@@ -121,22 +122,63 @@ describe('CREATE COLUMN VALUES', () => {
           created_at: new Date(1610964545410),
         },
       ];
-      expect(createCommentData(originalArray)).toEqual([
+      const dic = {
+        Agricola: 1,
+        Jenga: 2,
+        'Ultimate Werewolf': 3,
+        'Dolor reprehenderit': 4,
+        'Proident tempor et.': 5,
+      };
+      expect(createCommentData(originalArray, dic)).toEqual([
         [
-          'I loved this game too!',
-          'Jenga',
           'bainesface',
+          2,
           16,
           new Date(1511354613389),
+          'I loved this game too!',
         ],
         [
-          'My dog loved this game too!',
-          'Ultimate Werewolf',
           'mallionaire',
+          3,
           13,
           new Date(1610964545410),
+          'My dog loved this game too!',
         ],
       ]);
     });
+  });
+});
+
+describe('createRevRef', () => {
+  it('returns an object when given an array', () => {
+    expect(createRevRef([])).toEqual({});
+  });
+  it('returns a key-value pair for the object in the array', () => {
+    expect(createRevRef([{ review_id: 8, title: 'Wizzard' }])).toEqual({
+      Wizzard: 8,
+    });
+  });
+  it('returns a key-value pair for any object in the array', () => {
+    expect(
+      createRevRef([
+        { review_id: 8, title: 'Wizzard' },
+        { review_id: 13, title: 'BioShock' },
+      ])
+    ).toEqual({
+      Wizzard: 8,
+      BioShock: 13,
+    });
+  });
+  it('does not mutate the original array', () => {
+    const comments = [
+      { review_id: 8, title: 'Wizzard' },
+      { review_id: 13, title: 'BioShock' },
+    ];
+    createRevRef(comments);
+
+    expect(comments).toEqual([
+      { review_id: 8, title: 'Wizzard' },
+      { review_id: 13, title: 'BioShock' },
+    ]);
   });
 });

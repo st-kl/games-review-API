@@ -5,6 +5,7 @@ const {
   createUserData,
   createReviewData,
   createCommentData,
+  createRevRef,
 } = require('../utils/data-manipulation');
 
 const seed = async (data) => {
@@ -49,11 +50,11 @@ const seed = async (data) => {
   await db.query(`
     CREATE TABLE comments (
       comment_id SERIAL PRIMARY KEY,
-      body TEXT NOT NULL,
-      belongs_to VARCHAR(50) NOT NULL,
-      created_by VARCHAR(50) REFERENCES users(username) NOT NULL,
+      author VARCHAR(50) REFERENCES users(username) NOT NULL,
+      review_id INT REFERENCES reviews(review_id) NOT NULL,
       votes INT DEFAULT 0,
-      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      body TEXT NOT NULL
     );`);
 
   // insert categories data
@@ -93,18 +94,19 @@ const seed = async (data) => {
     `,
     createReviewData(reviewData)
   );
-  const result = await db.query(insertReviewData);
-  
+  const { rows } = await db.query(insertReviewData);
+  const revRefs = createRevRef(rows);
+
   // insert comments data
   const insertCommentData = format(
     `
     INSERT INTO comments
-    (body, belongs_to, created_by, votes, created_at)
+    (author, review_id, votes, created_at, body)
     VALUES
     %L
     RETURNING *;
     `,
-    createCommentData(commentData)
+    createCommentData(commentData, revRefs)
   );
   await db.query(insertCommentData);
 };
