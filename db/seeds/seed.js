@@ -4,12 +4,7 @@ const {
   createCategoryData,
   createUserData,
   createReviewData,
-<<<<<<< HEAD
 } = require('../utils/data-manipulation');
-=======
-  createCommentData,
-} = require("../utils/data-manipulation");
->>>>>>> ac6dd208b05ad4f97332c1c6b3e4f696c10e5812
 
 const seed = async (data) => {
   const { categoryData, commentData, reviewData, userData } = data;
@@ -86,7 +81,6 @@ const seed = async (data) => {
   );
   await db.query(insertUserData);
 
-<<<<<<< HEAD
   // insert reviews data
   const insertReviewData = format(
     `
@@ -99,27 +93,6 @@ const seed = async (data) => {
     createReviewData(reviewData)
   );
   result = await db.query(insertReviewData);
-=======
-      return db.query(insertUsers);
-    })
-    .then(() => {
-      const insertReviews = format(
-        `INSERT INTO reviews(title, designer, owner, review_body, created_at, category, votes, review_img_url) VALUES %L RETURNING *;`,
-        createReviewData(reviewData)
-      );
-      //console.log(insertReviews);
-      return db.query(insertReviews);
-    })
-    .then((result) => console.table(result.rows))
-    .then(() => {
-      const insertComments = format(
-        `INSERT INTO comments(comment_id, author, review_id) VALUES %L RETURNING *;`,
-        createCommentData(commentData)
-      );
-      return db.query(insertComments);
-    })
-    .then((result) => console.table(result.rows));
->>>>>>> ac6dd208b05ad4f97332c1c6b3e4f696c10e5812
 };
 
 module.exports = seed;
