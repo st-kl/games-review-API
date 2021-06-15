@@ -1,19 +1,20 @@
-const db = require('../connection');
-const format = require('pg-format');
+const db = require("../connection");
+const format = require("pg-format");
 const {
   createCategoryData,
   createUserData,
   createReviewData,
-} = require('../utils/data-manipulation');
+  createCommentData,
+} = require("../utils/data-manipulation");
 
 const seed = async (data) => {
   const { categoryData, commentData, reviewData, userData } = data;
 
   // drop tables
-  await db.query('DROP TABLE IF EXISTS comments;');
-  await db.query('DROP TABLE IF EXISTS reviews;');
-  await db.query('DROP TABLE IF EXISTS users;');
-  await db.query('DROP TABLE IF EXISTS categories;');
+  await db.query("DROP TABLE IF EXISTS comments;");
+  await db.query("DROP TABLE IF EXISTS reviews;");
+  await db.query("DROP TABLE IF EXISTS users;");
+  await db.query("DROP TABLE IF EXISTS categories;");
 
   // create categories table
   await db.query(`
@@ -85,14 +86,27 @@ const seed = async (data) => {
   const insertReviewData = format(
     `
     INSERT INTO reviews 
-    (title, designer, owner, review_img_url, review_body,  category, created_at, votes) 
+    (title, designer, owner, review_body, created_at, category, votes, review_img_url) 
     VALUES 
     %L 
     RETURNING *;
     `,
     createReviewData(reviewData)
   );
-  result = await db.query(insertReviewData);
-};
+  await db.query(insertReviewData);
 
+  // insert comments data
+  const insertCommentData = format(
+    `
+    INSERT INTO comments 
+    (author, review_id, votes, created_at, body) 
+    VALUES 
+    %L 
+    RETURNING *;
+    `,
+    console.log(createCommentData(commentData))
+  );
+
+  await db.query(insertCommentData);
+};
 module.exports = seed;

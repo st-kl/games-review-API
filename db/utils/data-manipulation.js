@@ -16,17 +16,23 @@ exports.createReviewData = (reviewData) => {
       review.title,
       review.designer,
       review.owner,
-      review.review_img_url,
       review.review_body,
-      review.category,
       review.created_at,
+      review.category,
       review.votes,
+      review.review_img_url,
     ];
   });
 };
 
 exports.createCommentData = (array) => {
   return array.map((comment) => {
-    return [comment.author, comment.review_id];
+    return [
+      comment.author,
+      comment.review_id,
+      comment.votes,
+      comment.created_at,
+      comment.body,
+    ];
   });
 };
