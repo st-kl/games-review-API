@@ -20,7 +20,8 @@ exports.createReviewData = (reviewData) => {
       review.created_at,
       review.category,
       review.votes,
-      review.review_img_url,
+      review.review_img_url ||
+        'https://images.pexels.com/photos/163064/play-stone-network-networked-interactive-163064.jpeg',
     ];
   });
 };
@@ -28,11 +29,11 @@ exports.createReviewData = (reviewData) => {
 exports.createCommentData = (array) => {
   return array.map((comment) => {
     return [
-      comment.author,
-      comment.review_id,
+      comment.body,
+      comment.belongs_to,
+      comment.created_by,
       comment.votes,
       comment.created_at,
-      comment.body,
     ];
   });
 };

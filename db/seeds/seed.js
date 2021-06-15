@@ -1,20 +1,20 @@
-const db = require("../connection");
-const format = require("pg-format");
+const db = require('../connection');
+const format = require('pg-format');
 const {
   createCategoryData,
   createUserData,
   createReviewData,
   createCommentData,
-} = require("../utils/data-manipulation");
+} = require('../utils/data-manipulation');
 
 const seed = async (data) => {
   const { categoryData, commentData, reviewData, userData } = data;
 
   // drop tables
-  await db.query("DROP TABLE IF EXISTS comments;");
-  await db.query("DROP TABLE IF EXISTS reviews;");
-  await db.query("DROP TABLE IF EXISTS users;");
-  await db.query("DROP TABLE IF EXISTS categories;");
+  await db.query('DROP TABLE IF EXISTS comments;');
+  await db.query('DROP TABLE IF EXISTS reviews;');
+  await db.query('DROP TABLE IF EXISTS users;');
+  await db.query('DROP TABLE IF EXISTS categories;');
 
   // create categories table
   await db.query(`
@@ -49,11 +49,11 @@ const seed = async (data) => {
   await db.query(`
     CREATE TABLE comments (
       comment_id SERIAL PRIMARY KEY,
-      author VARCHAR(50) REFERENCES users(username) NOT NULL,
-      review_id INT REFERENCES reviews(review_id) NOT NULL,
+      body TEXT NOT NULL,
+      belongs_to VARCHAR(50) NOT NULL,
+      created_by VARCHAR(50) REFERENCES users(username) NOT NULL,
       votes INT DEFAULT 0,
-      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-      body TEXT NOT NULL
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );`);
 
   // insert categories data
@@ -93,20 +93,20 @@ const seed = async (data) => {
     `,
     createReviewData(reviewData)
   );
-  await db.query(insertReviewData);
-
+  const result = await db.query(insertReviewData);
+  
   // insert comments data
   const insertCommentData = format(
     `
-    INSERT INTO comments 
-    (author, review_id, votes, created_at, body) 
-    VALUES 
-    %L 
+    INSERT INTO comments
+    (body, belongs_to, created_by, votes, created_at)
+    VALUES
+    %L
     RETURNING *;
     `,
-    console.log(createCommentData(commentData))
+    createCommentData(commentData)
   );
-
   await db.query(insertCommentData);
 };
+
 module.exports = seed;
