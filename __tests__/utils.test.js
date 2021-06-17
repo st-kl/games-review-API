@@ -104,7 +104,7 @@ describe('CREATE COLUMN VALUES', () => {
     });
   });
 
-  describe.only('comment data', () => {
+  describe('comment data', () => {
     it('returns array of comment data', () => {
       const originalArray = [
         {

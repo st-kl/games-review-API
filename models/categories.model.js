@@ -33,7 +33,7 @@ exports.selectReviewById = async (reviewId) => {
   return res.rows;
 };
 
-exports.updateReviewById = async (reviewId, inc_votes) => {
+exports.updateReviewById = async (reviewId, inc_votes, bodyLength) => {
   if (!inc_votes || bodyLength > 1) {
     return Promise.reject({
       status: 400,
@@ -85,9 +85,6 @@ exports.selectReviews = async (
     return Promise.reject({ status: 400, msg: 'Invalid order query' });
   }
 
-  // validate categories
-  await checkExists('reviews', 'category', category);
-
   // query arguments
   const queryValues = [];
   let queryStr = `
@@ -106,19 +103,24 @@ exports.selectReviews = async (
   ON
     comments.review_id = reviews.review_id`;
 
-  // add colour to query values if provided and extend query string
+  // add category to query values if provided and extend query string
   if (category) {
     queryValues.push(category);
     queryStr += ` WHERE reviews.category = $1`;
   }
 
-  //extend query string with group by
+  // extend query string with group by
   queryStr += ` GROUP BY reviews.review_id`;
 
   // extend query string with order by
   queryStr += ` ORDER BY reviews.${sort_by} ${order};`;
 
   const result = await db.query(queryStr, queryValues);
+
+  // validate categories if query returns no results
+  if (result.rows.length === 0) {
+    await checkExists('categories', 'slug', category);
+  }
 
   return result.rows;
 };

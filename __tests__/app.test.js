@@ -3,6 +3,7 @@ const db = require('../db/connection.js');
 const testData = require('../db/data/test-data/index.js');
 const seed = require('../db/seeds/seed.js');
 const request = require('supertest');
+const { checkExists } = require('../db/utils/query-check.js');
 
 beforeEach(() => seed(testData));
 afterAll(() => db.end());
@@ -184,11 +185,30 @@ describe('GET /api/reviews', () => {
   });
   it('200: returns reviews filtered by category in query', () => {
     return request(app)
-      .get('/api/reviews?category=strategy')
+      .get('/api/reviews?category=dexterity')
       .then(({ body }) => {
         body.reviews.forEach((review) =>
-          expect(review.category).toBe('strategy')
+          expect(review.category).toBe('dexterity')
         );
       });
+  });
+  it('200: returns no reviews if category exists but no reviews with that category', () => {
+    return request(app)
+      .get("/api/reviews?category=children's games")
+      .then(({ body }) => {
+        body.reviews.forEach((review) =>
+          expect(review.category).toBe("children's games")
+        );
+      });
+  });
+});
+
+describe('checkExists', () => {
+  it('400: resource does not exists', () => {
+    const input = ['categories', 'slug', 'strategy'];
+
+    checkExists(...input).then(({ body }) => {
+      expect(body.msg).toBe('resource does not exist');
+    });
   });
 });

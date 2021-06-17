@@ -136,7 +136,7 @@ describe('GET /api/reviews', () => {
       .get('/api/reviews?category=hitandrun')
       .expect(404)
       .then(({ body }) => {
-        expect(body.msg).toBe('category does not exist');
+        expect(body.msg).toBe('resource does not exist');
       });
   });
 });

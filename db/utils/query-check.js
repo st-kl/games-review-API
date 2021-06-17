@@ -8,6 +8,6 @@ exports.checkExists = async (table, column, value) => {
 
   if (dbOutput.rows.length === 0) {
     // resource does NOT exist
-    return Promise.reject({ status: 404, msg: 'category does not exist' });
+    return Promise.reject({ status: 404, msg: 'resource does not exist' });
   }
 };
