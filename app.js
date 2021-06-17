@@ -1,5 +1,6 @@
 const express = require('express');
 const {
+  handleInvalidPath,
   customErrors,
   handlePsqlErrors,
   handle500Errors,
@@ -13,9 +14,7 @@ app.use(express.json());
 app.use('/api', apiRouter);
 
 // Errors
-app.all('/*', (req, res) => {
-  res.status(404).send({ msg: 'Not Found' });
-});
+app.all('/*', handleInvalidPath);
 app.use(customErrors);
 app.use(handlePsqlErrors);
 app.use(handle500Errors);

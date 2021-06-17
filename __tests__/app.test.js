@@ -52,7 +52,7 @@ describe('GET /api/reviews/:review_id', () => {
             category: 'dexterity',
             created_at: '2021-01-18T10:01:41.251Z',
             votes: 5,
-            count: '3',
+            count: 3,
           },
         ]);
         expect(Array.isArray(body.reviews)).toBe(true);
@@ -131,6 +131,7 @@ describe('GET /api/reviews', () => {
               review_img_url: expect.any(String),
               created_at: expect.any(String),
               comment_count: expect.any(Number),
+              votes: expect.any(Number),
             })
           );
         });
@@ -141,8 +142,13 @@ describe('GET /api/reviews', () => {
       .get('/api/reviews')
       .expect(200)
       .then(({ body }) => {
-        expect(body.reviews[0].comment_count).toBe(3);
-        expect(body.reviews[1].comment_count).toBe(3);
+        body.reviews.forEach((review) => {
+          if (review.slug === 'Jenga') {
+            expect(review.comment_count).toBe(3);
+          } else if (review.slug === 'Agricola') {
+            expect(review.comment_count).toBe(0);
+          }
+        });
       });
   });
   it('200: returns reviews sorted by date by default', () => {
@@ -196,9 +202,8 @@ describe('GET /api/reviews', () => {
     return request(app)
       .get("/api/reviews?category=children's games")
       .then(({ body }) => {
-        body.reviews.forEach((review) =>
-          expect(review.category).toBe("children's games")
-        );
+        console.log(body);
+        expect(body.reviews.length).toBe(0);
       });
   });
 });

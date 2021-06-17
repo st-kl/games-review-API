@@ -11,13 +11,13 @@ exports.selectReviewById = async (reviewId) => {
     `
   SELECT 
     reviews.*,
-    COUNT(comments.comment_id)
+    COUNT(comments.comment_id)::INT
   FROM 
-    comments
-  LEFT JOIN
     reviews
+  LEFT JOIN
+    comments
   ON
-    comments.review_id = reviews.review_id
+    reviews.review_id = comments.review_id 
   WHERE
     reviews.review_id = $1
   GROUP BY
@@ -34,7 +34,7 @@ exports.selectReviewById = async (reviewId) => {
 };
 
 exports.updateReviewById = async (reviewId, inc_votes, bodyLength) => {
-  if (!inc_votes || bodyLength > 1) {
+  if (!inc_votes || bodyLength !== 1) {
     return Promise.reject({
       status: 400,
       msg: 'Bad Request',
@@ -95,13 +95,14 @@ exports.selectReviews = async (
   reviews.category,
   reviews.review_img_url,
   reviews.created_at,
+  reviews.votes,
   COUNT(comments.comment_id)::INT AS comment_count
   FROM 
-    comments
-  LEFT JOIN
     reviews
+  LEFT JOIN
+    comments
   ON
-    comments.review_id = reviews.review_id`;
+    reviews.review_id = comments.review_id `;
 
   // add category to query values if provided and extend query string
   if (category) {
