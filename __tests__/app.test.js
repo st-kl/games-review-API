@@ -39,7 +39,6 @@ describe('GET /api/reviews/:review_id', () => {
       .get('/api/reviews/2')
       .expect(200)
       .then(({ body }) => {
-        console.log(body);
         expect(body.reviews).toEqual([
           {
             review_id: 2,
@@ -107,7 +106,7 @@ describe('PATCH /api/reviews/:review_id', () => {
   });
 });
 
-describe.only('GET /api/reviews', () => {
+describe('GET /api/reviews', () => {
   it('200: responds with an object with reviews key and array value', () => {
     return request(app)
       .get('/api/reviews')
@@ -143,6 +142,53 @@ describe.only('GET /api/reviews', () => {
       .then(({ body }) => {
         expect(body.reviews[0].comment_count).toBe(3);
         expect(body.reviews[1].comment_count).toBe(3);
+      });
+  });
+  it('200: returns reviews sorted by date by default', () => {
+    return request(app)
+      .get('/api/reviews')
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.reviews).toBeSortedBy('created_at', {
+          descending: true,
+        });
+      });
+  });
+  it('200: returns reviews sorted by query value', () => {
+    return request(app)
+      .get('/api/reviews?sort_by=title')
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.reviews).toBeSortedBy('title', {
+          descending: true,
+        });
+      });
+  });
+  it('200: returns reviews sorted by query value in asc order', () => {
+    return request(app)
+      .get('/api/reviews?sort_by=review_id&order=asc')
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.reviews).toBeSortedBy('review_id');
+      });
+  });
+  it('200: returns reviews sorted by query value in desc order', () => {
+    return request(app)
+      .get('/api/reviews?sort_by=review_id&order=desc')
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.reviews).toBeSortedBy('review_id', {
+          descending: true,
+        });
+      });
+  });
+  it('200: returns reviews filtered by category in query', () => {
+    return request(app)
+      .get('/api/reviews?category=strategy')
+      .then(({ body }) => {
+        body.reviews.forEach((review) =>
+          expect(review.category).toBe('strategy')
+        );
       });
   });
 });
