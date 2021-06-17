@@ -1,4 +1,9 @@
 const express = require('express');
+const {
+  customErrors,
+  handlePsqlErrors,
+  handle500Errors,
+} = require('./errors/app.errors');
 const apiRouter = require('./routes/api.router');
 const app = express();
 
@@ -11,10 +16,8 @@ app.use('/api', apiRouter);
 app.all('/*', (req, res) => {
   res.status(404).send({ msg: 'Not Found' });
 });
-
-// Handle status:500s
-//app.use(handleError500s);
-
-//app.use(...);
+app.use(customErrors);
+app.use(handlePsqlErrors);
+app.use(handle500Errors);
 
 module.exports = app;
