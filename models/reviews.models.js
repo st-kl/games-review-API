@@ -116,12 +116,69 @@ exports.selectReviews = async (
   queryStr += ` ORDER BY reviews.${sort_by} ${order};`;
 
   // start query
-  const result = await db.query(queryStr, queryValues);
+  const res = await db.query(queryStr, queryValues);
 
   // validate categories if query returns no results
-  if (result.rows.length === 0) {
+  if (res.rows.length === 0) {
     await checkExists('categories', 'slug', category);
   }
 
-  return result.rows;
+  return res.rows;
+};
+
+exports.selectReviewComments = async (reviewId) => {
+  const res = await db.query(
+    `
+  SELECT 
+    comment_id,
+    votes,
+    created_at,
+    author,
+    body
+  FROM 
+    comments
+  WHERE
+    review_id = $1;`,
+    [reviewId]
+  );
+
+  if (res.rows.length === 0) {
+    await checkExists('comments', 'review_id', reviewId);
+  }
+
+  return res.rows;
+};
+
+exports.addComment = async (reviewId, newComment) => {
+  const { username, body } = newComment;
+  const bodyLength = Object.keys(newComment).length;
+
+  // validate request body
+  if (
+    bodyLength !== 2 ||
+    typeof username !== 'string' ||
+    typeof body !== 'string'
+  ) {
+    return Promise.reject({
+      status: 400,
+      msg: 'Bad Request',
+    });
+  }
+
+  // validate username
+  await checkExists('users', 'username', username);
+
+  const res = await db.query(
+    `
+  INSERT INTO comments
+  (author, review_id, body)
+  VALUES
+  ($1, $2, $3)
+  RETURNING *;
+  
+  `,
+    [username, reviewId, body]
+  );
+
+  return res.rows[0];
 };

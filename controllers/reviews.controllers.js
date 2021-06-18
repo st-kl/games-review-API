@@ -1,8 +1,11 @@
 const express = require('express');
+const { selectCategories } = require('../models/categories.models');
 const {
   selectReviewById,
   updateReviewById,
   selectReviews,
+  selectReviewComments,
+  addComment,
 } = require('../models/reviews.models');
 selectReviewById;
 
@@ -30,5 +33,22 @@ exports.getReviews = (req, res, next) => {
     .then((reviews) => {
       res.status(200).send({ reviews });
     })
+    .catch(next);
+};
+
+exports.getReviewComments = (req, res, next) => {
+  const reviewId = req.params.review_id;
+  selectReviewComments(reviewId)
+    .then((comments) => {
+      res.status(200).send({ comments });
+    })
+    .catch(next);
+};
+
+exports.postComment = (req, res, next) => {
+  const reviewId = req.params.review_id;
+  const newComment = req.body;
+  addComment(reviewId, newComment)
+    .then((comment) => res.status(201).send({ comment }))
     .catch(next);
 };

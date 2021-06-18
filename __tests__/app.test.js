@@ -4,6 +4,7 @@ const testData = require('../db/data/test-data/index.js');
 const seed = require('../db/seeds/seed.js');
 const request = require('supertest');
 const { checkExists } = require('../db/utils/query-check.js');
+const { apiInfo } = require('../controllers/api.controllers.js');
 
 beforeEach(() => seed(testData));
 afterAll(() => db.end());
@@ -322,17 +323,17 @@ describe('GET /api/reviews', () => {
       .get('/api/reviews?category=hitandrun')
       .expect(404)
       .then(({ body }) => {
-        expect(body.msg).toBe('resource does not exist');
+        expect(body.msg).toBe('Not Found');
       });
   });
 });
 
 describe('checkExists', () => {
-  it('400: resource does not exists', () => {
+  it('400: Not Founds', () => {
     const input = ['categories', 'slug', 'strategy'];
 
     return checkExists(...input).catch((err) =>
-      expect(err.msg).toBe('resource does not exist')
+      expect(err.msg).toBe('Not Found')
     );
   });
   it('resource does exists', () => {
@@ -344,4 +345,140 @@ describe('checkExists', () => {
   });
 });
 
-describe('/api/reviews/:review_id/comments', () => {});
+describe('GET /api/reviews/:review_id/comments', () => {
+  it('200: returns an array with correct length', () => {
+    return request(app)
+      .get('/api/reviews/2/comments')
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.comments.length).toBe(3);
+        body.comments.forEach((comment) => {
+          expect(comment).toEqual(
+            expect.objectContaining({
+              comment_id: expect.any(Number),
+              votes: expect.any(Number),
+              created_at: expect.any(String),
+              author: expect.any(String),
+              body: expect.any(String),
+            })
+          );
+        });
+      });
+  });
+  it('404: Not Found - ID does not exist', () => {
+    return request(app)
+      .get('/api/reviews/14/comments')
+      .expect(404)
+      .then(({ body }) => {
+        expect(body).toEqual({ msg: 'Not Found' });
+      });
+  });
+  it('400: Not Found - ID invalid', () => {
+    return request(app)
+      .get('/api/reviews/elephant/comments')
+      .expect(400)
+      .then(({ body }) => {
+        expect(body).toEqual({ msg: 'Bad Request' });
+      });
+  });
+});
+
+describe('POST /api/reviews/:review_id/comments', () => {
+  it('200: returns posted comment ', () => {
+    return request(app)
+      .post('/api/reviews/1/comments')
+      .send({ username: 'bainesface', body: 'new comment' })
+      .expect(201)
+      .then(({ body }) => {
+        expect(body.comment).toEqual({
+          comment_id: 7,
+          author: 'bainesface',
+          review_id: 1,
+          votes: 0,
+          created_at: expect.any(String),
+          body: 'new comment',
+        });
+      });
+  });
+  it('404: Not Found - ID does not exist', () => {
+    return request(app)
+      .post('/api/reviews/14/comments')
+      .send({ username: 'bainesface', body: 'new comment' })
+      .expect(404)
+      .then(({ body }) => {
+        expect(body).toEqual({ msg: 'Not Found' });
+      });
+  });
+  it('400: Bad Request - ID invalid', () => {
+    return request(app)
+      .post('/api/reviews/elephant/comments')
+      .send({ username: 'bainesface', body: 'new comment' })
+      .expect(400)
+      .then(({ body }) => {
+        expect(body).toEqual({ msg: 'Bad Request' });
+      });
+  });
+  it('404: Not Found - username does not exist', () => {
+    return request(app)
+      .post('/api/reviews/1/comments')
+      .send({ username: 'notauser', body: 'new comment' })
+      .expect(404)
+      .then(({ body }) => {
+        expect(body).toEqual({ msg: 'Not Found' });
+      });
+  });
+  it('400: Bad Request - wrong number of keys in body', () => {
+    return request(app)
+      .post('/api/reviews/1/comments')
+      .send({ username: 'bainesface', body: 'new comment', name: 'mitch' })
+      .expect(400)
+      .then(({ body }) => {
+        expect(body).toEqual({ msg: 'Bad Request' });
+      });
+  });
+  it('400: Bad Request - wrong username data type', () => {
+    return request(app)
+      .post('/api/reviews/1/comments')
+      .send({ username: 7, body: 'new comment' })
+      .expect(400)
+      .then(({ body }) => {
+        expect(body).toEqual({ msg: 'Bad Request' });
+      });
+  });
+  it('400: Bad Request - wrong body data type', () => {
+    return request(app)
+      .post('/api/reviews/1/comments')
+      .send({ username: 'bainesface', body: 8 })
+      .expect(400)
+      .then(({ body }) => {
+        expect(body).toEqual({ msg: 'Bad Request' });
+      });
+  });
+  it('400: Bad Request - wrong username key', () => {
+    return request(app)
+      .post('/api/reviews/1/comments')
+      .send({ user: 'bainesface', body: 'new comment' })
+      .expect(400)
+      .then(({ body }) => {
+        expect(body).toEqual({ msg: 'Bad Request' });
+      });
+  });
+  it('400: Bad Request - wrong body key', () => {
+    return request(app)
+      .post('/api/reviews/1/comments')
+      .send({ username: 'bainesface', bo: 'new comment' })
+      .expect(400)
+      .then(({ body }) => {
+        expect(body).toEqual({ msg: 'Bad Request' });
+      });
+  });
+});
+
+describe('GET /api', () => {
+  it('200: returns JSON describing all available endpoints', () => {
+    return request(app)
+      .get('/api')
+      .expect(200)
+      .then(({ body }) => expect(body).toEqual({ apiInfo }));
+  });
+});
