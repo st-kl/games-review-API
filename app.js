@@ -10,10 +10,10 @@ const app = express();
 
 app.use(express.json());
 
-// Routers
+// ------- Routers -------
 app.use('/api', apiRouter);
 
-// Errors
+// ------- Errors -------
 app.all('/*', handleInvalidPath);
 app.use(customErrors);
 app.use(handlePsqlErrors);

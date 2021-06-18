@@ -34,6 +34,7 @@ exports.selectReviewById = async (reviewId) => {
 };
 
 exports.updateReviewById = async (reviewId, inc_votes, bodyLength) => {
+  // validate request body
   if (!inc_votes || bodyLength !== 1) {
     return Promise.reject({
       status: 400,
@@ -41,12 +42,15 @@ exports.updateReviewById = async (reviewId, inc_votes, bodyLength) => {
     });
   }
 
+  // update review
   await db.query(
     `
   UPDATE reviews SET votes = votes + $1 WHERE review_id = $2;
   `,
     [inc_votes, reviewId]
   );
+
+  // query to return updated review
   const res = await db.query(`SELECT * FROM reviews WHERE review_id = $1;`, [
     reviewId,
   ]);
@@ -116,6 +120,7 @@ exports.selectReviews = async (
   // extend query string with order by
   queryStr += ` ORDER BY reviews.${sort_by} ${order};`;
 
+  // start query
   const result = await db.query(queryStr, queryValues);
 
   // validate categories if query returns no results
