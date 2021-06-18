@@ -1,8 +1,8 @@
 const {
+  getReviews,
   getReviewById,
   patchReviewById,
-  getReviews,
-} = require('../controllers/categories.controller');
+} = require('../controllers/reviews..controllers');
 const reviews = require('../db/data/test-data/reviews');
 const reviewsRouter = require('express').Router();
 
