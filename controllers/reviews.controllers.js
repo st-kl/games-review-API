@@ -1,4 +1,3 @@
-const express = require('express');
 const { selectCategories } = require('../models/categories.models');
 const {
   selectReviewById,
@@ -7,7 +6,6 @@ const {
   selectReviewComments,
   addComment,
 } = require('../models/reviews.models');
-selectReviewById;
 
 exports.getReviewById = (req, res, next) => {
   const reviewId = req.params.review_id;
@@ -49,6 +47,6 @@ exports.postComment = (req, res, next) => {
   const reviewId = req.params.review_id;
   const newComment = req.body;
   addComment(reviewId, newComment)
-    .then((comment) => res.status(201).send({ comment }))
+    .then((comments) => res.status(201).send({ comments }))
     .catch(next);
 };

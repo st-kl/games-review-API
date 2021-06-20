@@ -1,4 +1,3 @@
-const express = require('express');
 const { selectCategories } = require('../models/categories.models');
 selectCategories;
 

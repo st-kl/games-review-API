@@ -22,7 +22,7 @@ exports.selectReviewById = async (reviewId) => {
   if (res.rows.length === 0) {
     return Promise.reject({
       status: 404,
-      msg: 'Not Found - ID does not exist',
+      msg: 'not found',
     });
   }
   return res.rows;
@@ -33,7 +33,7 @@ exports.updateReviewById = async (reviewId, inc_votes, bodyLength) => {
   if (!inc_votes || bodyLength !== 1) {
     return Promise.reject({
       status: 400,
-      msg: 'Bad Request',
+      msg: 'bad request',
     });
   }
 
@@ -52,10 +52,10 @@ exports.updateReviewById = async (reviewId, inc_votes, bodyLength) => {
   if (res.rows.length === 0) {
     return Promise.reject({
       status: 404,
-      msg: 'Not Found - ID does not exist',
+      msg: 'not found',
     });
   }
-  return res.rows[0];
+  return res.rows;
 };
 
 exports.selectReviews = async (
@@ -143,7 +143,7 @@ exports.selectReviewComments = async (reviewId) => {
   );
 
   if (res.rows.length === 0) {
-    await checkExists('comments', 'review_id', reviewId);
+    await checkExists('reviews', 'review_id', reviewId);
   }
 
   return res.rows;
@@ -161,7 +161,7 @@ exports.addComment = async (reviewId, newComment) => {
   ) {
     return Promise.reject({
       status: 400,
-      msg: 'Bad Request',
+      msg: 'bad request',
     });
   }
 
@@ -171,14 +171,14 @@ exports.addComment = async (reviewId, newComment) => {
   const res = await db.query(
     `
   INSERT INTO comments
-  (author, review_id, body)
+    (author, review_id, body)
   VALUES
-  ($1, $2, $3)
+    ($1, $2, $3)
   RETURNING *;
   
   `,
     [username, reviewId, body]
   );
 
-  return res.rows[0];
+  return res.rows;
 };

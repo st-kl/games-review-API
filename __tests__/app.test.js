@@ -10,18 +10,18 @@ beforeEach(() => seed(testData));
 afterAll(() => db.end());
 
 describe('invalid url path', () => {
-  test('status:404 - Not Found', () => {
+  test('status:404 - not found', () => {
     return request(app)
       .get('/anything')
       .expect(404)
       .then(({ body }) => {
-        expect(body).toEqual({ msg: 'Not Found' });
+        expect(body).toEqual({ msg: 'not found' });
       });
   });
 });
 
 describe('GET /api/categories', () => {
-  it('200: each category has required keys and correct value data types', () => {
+  it('200: each category has required keys, correct value data types and number of items', () => {
     return request(app)
       .get('/api/categories')
       .expect(200)
@@ -40,59 +40,58 @@ describe('GET /api/categories', () => {
 });
 
 describe('GET /api/reviews/:review_id', () => {
-  it('200: returns a review object with the required properties ', () => {
+  it('200: returns an array with review object with the required properties ', () => {
     return request(app)
       .get('/api/reviews/2')
       .expect(200)
       .then(({ body }) => {
-        expect(body.reviews).toEqual([
-          {
-            review_id: 2,
-            title: 'Jenga',
-            designer: 'Leslie Scott',
-            owner: 'philippaclaire9',
-            review_img_url:
-              'https://www.golenbock.com/wp-content/uploads/2015/01/placeholder-user.png',
-            review_body: 'Fiddly fun for all the family',
-            category: 'dexterity',
-            created_at: '2021-01-18T10:01:41.251Z',
-            votes: 5,
-            count: 3,
-          },
-        ]);
         expect(Array.isArray(body.reviews)).toBe(true);
+        expect(body.reviews.length).toBe(1);
+        expect(body.reviews[0]).toEqual({
+          review_id: 2,
+          title: 'Jenga',
+          designer: 'Leslie Scott',
+          owner: 'philippaclaire9',
+          review_img_url:
+            'https://www.golenbock.com/wp-content/uploads/2015/01/placeholder-user.png',
+          review_body: 'Fiddly fun for all the family',
+          category: 'dexterity',
+          created_at: '2021-01-18T10:01:41.251Z',
+          votes: 5,
+          count: 3,
+        });
       });
   });
-  it('404: Not Found - ID does not exist', () => {
+  it('404: not found - ID does not exist', () => {
     return request(app)
       .get('/api/reviews/14')
       .expect(404)
       .then(({ body }) => {
-        expect(body).toEqual({ msg: 'Not Found - ID does not exist' });
+        expect(body).toEqual({ msg: 'not found' });
       });
   });
-  it('400: Bad Request', () => {
+  it('400: bad request - review ID not a number', () => {
     return request(app)
       .get('/api/reviews/elephant')
       .expect(400)
       .then(({ body }) => {
         expect(body).toEqual({
-          msg: 'Bad Request',
+          msg: 'bad request',
         });
       });
   });
 });
 
 describe('PATCH /api/reviews/:review_id', () => {
-  it('200: returns updated review object (inc)', () => {
-    const incVoteBy = { inc_votes: 13 };
-
+  it('200: returns an array with the updated review object (inc)', () => {
     return request(app)
       .patch('/api/reviews/2')
-      .send(incVoteBy)
+      .send({ inc_votes: 13 })
       .expect(200)
       .then(({ body }) => {
-        expect(body.reviews).toEqual({
+        expect(Array.isArray(body.reviews)).toBe(true);
+        expect(body.reviews.length).toBe(1);
+        expect(body.reviews[0]).toEqual({
           review_id: 2,
           title: 'Jenga',
           designer: 'Leslie Scott',
@@ -106,15 +105,15 @@ describe('PATCH /api/reviews/:review_id', () => {
         });
       });
   });
-  it('200: returns updated review object (dec)', () => {
-    const incVoteBy = { inc_votes: -3 };
-
+  it('200: returns an array with the updated review object (dec)', () => {
     return request(app)
       .patch('/api/reviews/2')
-      .send(incVoteBy)
+      .send({ inc_votes: -3 })
       .expect(200)
       .then(({ body }) => {
-        expect(body.reviews).toEqual({
+        expect(Array.isArray(body.reviews)).toBe(true);
+        expect(body.reviews.length).toBe(1);
+        expect(body.reviews[0]).toEqual({
           review_id: 2,
           title: 'Jenga',
           designer: 'Leslie Scott',
@@ -128,82 +127,70 @@ describe('PATCH /api/reviews/:review_id', () => {
         });
       });
   });
-  it('404: Not Found - ID does not exist', () => {
-    const incVoteBy = { inc_votes: 13 };
-
+  it('404: not found - ID does not exist', () => {
     return request(app)
       .patch('/api/reviews/14')
-      .send(incVoteBy)
+      .send({ inc_votes: 13 })
       .expect(404)
       .then(({ body }) => {
-        expect(body).toEqual({ msg: 'Not Found - ID does not exist' });
+        expect(body).toEqual({ msg: 'not found' });
       });
   });
-  it('400: Bad Request - invalid ID', () => {
-    const incVoteBy = { inc_votes: 13 };
-
+  it('400: bad request - invalid ID', () => {
     return request(app)
       .patch('/api/reviews/elephant')
-      .send(incVoteBy)
+      .send({ inc_votes: 13 })
       .expect(400)
       .then(({ body }) => {
-        expect(body).toEqual({ msg: 'Bad Request' });
+        expect(body).toEqual({ msg: 'bad request' });
       });
   });
-  it('400: Bad Request - invalid vote value', () => {
-    const incVoteBy = { inc_votes: 'test' };
-
+  it('400: bad request - invalid vote value', () => {
     return request(app)
       .patch('/api/reviews/2')
-      .send(incVoteBy)
+      .send({ inc_votes: 'test' })
       .expect(400)
       .then(({ body }) => {
-        expect(body).toEqual({ msg: 'Bad Request' });
+        expect(body).toEqual({ msg: 'bad request' });
       });
   });
-  it('400: Bad Request - invalid body (wrong key)', () => {
-    const incVoteBy = { inc: 13 };
-
+  it('400: bad request - invalid body (wrong key)', () => {
     return request(app)
       .patch('/api/reviews/2')
-      .send(incVoteBy)
+      .send({ inc: 13 })
       .expect(400)
       .then(({ body }) => {
         expect(body).toEqual({
-          msg: 'Bad Request',
+          msg: 'bad request',
         });
       });
   });
-  it('400: Bad Request - invalid body (empty body)', () => {
-    const incVoteBy = {};
-
+  it('400: bad request - invalid body (empty body)', () => {
     return request(app)
       .patch('/api/reviews/2')
-      .send(incVoteBy)
+      .send({})
       .expect(400)
       .then(({ body }) => {
         expect(body).toEqual({
-          msg: 'Bad Request',
+          msg: 'bad request',
         });
       });
   });
-  it('400: Bad Request - invalid body (too many keys)', () => {
-    const incVoteBy = { inc_votes: 1, name: 'Mitch' };
-
+  it('400: bad request - invalid body (too many keys)', () => {
     return request(app)
       .patch('/api/reviews/2')
-      .send(incVoteBy)
+      .send({ inc_votes: 1, name: 'Mitch' })
       .expect(400)
       .then(({ body }) => {
         expect(body).toEqual({
-          msg: 'Bad Request',
+          msg: 'bad request',
         });
       });
   });
 });
 
 describe('GET /api/reviews', () => {
-  it('200: responds with an object with reviews key and array value', () => {
+  it('200: responds with array of objects with reviews key', () => {
     return request(app)
       .get('/api/reviews')
       .expect(200)
@@ -257,17 +244,6 @@ describe('GET /api/reviews', () => {
         });
       });
   });
-  // it('200: returns reviews sorted by query value', () => {
-  //   return request(app)
-  //     .get('/api/reviews?sort_by=title')
-  //     .expect(200)
-  //     .then(({ body }) => {
-  //       console.log(body.reviews);
-  //       expect(body.reviews).toBeSortedBy('title', {
-  //         descending: true,
-  //       });
-  //     });
-  // });
   it('200: returns reviews sorted by query value in asc order', () => {
     return request(app)
       .get('/api/reviews?sort_by=review_id&order=asc')
@@ -290,6 +266,7 @@ describe('GET /api/reviews', () => {
     return request(app)
       .get('/api/reviews?category=dexterity')
       .then(({ body }) => {
+        expect(body.reviews.length).toBe(1);
         body.reviews.forEach((review) =>
           expect(review.category).toBe('dexterity')
         );
@@ -323,30 +300,13 @@ describe('GET /api/reviews', () => {
       .get('/api/reviews?category=hitandrun')
       .expect(404)
       .then(({ body }) => {
-        expect(body.msg).toBe('Not Found');
+        expect(body.msg).toBe('not found');
       });
   });
 });
 
-describe('checkExists', () => {
-  it('400: Not Founds', () => {
-    const input = ['categories', 'slug', 'strategy'];
-
-    return checkExists(...input).catch((err) =>
-      expect(err.msg).toBe('Not Found')
-    );
-  });
-  it('resource does exists', () => {
-    const input = ['categories', 'slug', 'euro game'];
-
-    return checkExists(...input).then((res) => {
-      expect(res).toBe(undefined);
-    });
-  });
-});
-
 describe('GET /api/reviews/:review_id/comments', () => {
-  it('200: returns an array with correct length', () => {
+  it('200: returns an array of comment objects if comments exist', () => {
     return request(app)
       .get('/api/reviews/2/comments')
       .expect(200)
@@ -365,20 +325,28 @@ describe('GET /api/reviews/:review_id/comments', () => {
         });
       });
   });
-  it('404: Not Found - ID does not exist', () => {
+  it('200: returns an empty array of comments if no comment exists', () => {
+    return request(app)
+      .get('/api/reviews/4/comments')
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.comments.length).toBe(0);
+      });
+  });
+  it('404: not found - ID does not exist', () => {
     return request(app)
       .get('/api/reviews/14/comments')
       .expect(404)
       .then(({ body }) => {
-        expect(body).toEqual({ msg: 'Not Found' });
+        expect(body).toEqual({ msg: 'not found' });
       });
   });
-  it('400: Not Found - ID invalid', () => {
+  it('400: not found - ID invalid', () => {
     return request(app)
       .get('/api/reviews/elephant/comments')
       .expect(400)
       .then(({ body }) => {
-        expect(body).toEqual({ msg: 'Bad Request' });
+        expect(body).toEqual({ msg: 'bad request' });
       });
   });
 });
@@ -390,7 +358,9 @@ describe('POST /api/reviews/:review_id/comments', () => {
       .send({ username: 'bainesface', body: 'new comment' })
       .expect(201)
       .then(({ body }) => {
-        expect(body.comment).toEqual({
+        expect(Array.isArray(body.comments)).toBe(true);
+        expect(body.comments.length).toBe(1);
+        expect(body.comments[0]).toEqual({
           comment_id: 7,
           author: 'bainesface',
           review_id: 1,
@@ -400,76 +370,76 @@ describe('POST /api/reviews/:review_id/comments', () => {
         });
       });
   });
-  it('404: Not Found - ID does not exist', () => {
+  it('404: not found - ID does not exist', () => {
     return request(app)
       .post('/api/reviews/14/comments')
       .send({ username: 'bainesface', body: 'new comment' })
       .expect(404)
       .then(({ body }) => {
-        expect(body).toEqual({ msg: 'Not Found' });
+        expect(body).toEqual({ msg: 'not found' });
       });
   });
-  it('400: Bad Request - ID invalid', () => {
+  it('400: bad request - ID invalid', () => {
     return request(app)
       .post('/api/reviews/elephant/comments')
       .send({ username: 'bainesface', body: 'new comment' })
       .expect(400)
       .then(({ body }) => {
-        expect(body).toEqual({ msg: 'Bad Request' });
+        expect(body).toEqual({ msg: 'bad request' });
       });
   });
-  it('404: Not Found - username does not exist', () => {
+  it('404: not found - username does not exist', () => {
     return request(app)
       .post('/api/reviews/1/comments')
       .send({ username: 'notauser', body: 'new comment' })
       .expect(404)
       .then(({ body }) => {
-        expect(body).toEqual({ msg: 'Not Found' });
+        expect(body).toEqual({ msg: 'not found' });
       });
   });
-  it('400: Bad Request - wrong number of keys in body', () => {
+  it('400: bad request - wrong number of keys in body', () => {
     return request(app)
       .post('/api/reviews/1/comments')
       .send({ username: 'bainesface', body: 'new comment', name: 'mitch' })
       .expect(400)
       .then(({ body }) => {
-        expect(body).toEqual({ msg: 'Bad Request' });
+        expect(body).toEqual({ msg: 'bad request' });
       });
   });
-  it('400: Bad Request - wrong username data type', () => {
+  it('400: bad request - wrong username data type', () => {
     return request(app)
       .post('/api/reviews/1/comments')
       .send({ username: 7, body: 'new comment' })
       .expect(400)
       .then(({ body }) => {
-        expect(body).toEqual({ msg: 'Bad Request' });
+        expect(body).toEqual({ msg: 'bad request' });
       });
   });
-  it('400: Bad Request - wrong body data type', () => {
+  it('400: bad request - wrong body data type', () => {
     return request(app)
       .post('/api/reviews/1/comments')
       .send({ username: 'bainesface', body: 8 })
       .expect(400)
       .then(({ body }) => {
-        expect(body).toEqual({ msg: 'Bad Request' });
+        expect(body).toEqual({ msg: 'bad request' });
       });
   });
-  it('400: Bad Request - wrong username key', () => {
+  it('400: bad request - wrong username key', () => {
     return request(app)
       .post('/api/reviews/1/comments')
       .send({ user: 'bainesface', body: 'new comment' })
       .expect(400)
       .then(({ body }) => {
-        expect(body).toEqual({ msg: 'Bad Request' });
+        expect(body).toEqual({ msg: 'bad request' });
       });
   });
-  it('400: Bad Request - wrong body key', () => {
+  it('400: bad request - wrong body key', () => {
     return request(app)
       .post('/api/reviews/1/comments')
       .send({ username: 'bainesface', bo: 'new comment' })
       .expect(400)
       .then(({ body }) => {
-        expect(body).toEqual({ msg: 'Bad Request' });
+        expect(body).toEqual({ msg: 'bad request' });
       });
   });
 });
@@ -480,5 +450,22 @@ describe('GET /api', () => {
       .get('/api')
       .expect(200)
       .then(({ body }) => expect(body).toEqual({ apiInfo }));
+  });
+});
+
+describe('UTIL: checkExists', () => {
+  it('400: not found', () => {
+    const input = ['categories', 'slug', 'strategy'];
+
+    return checkExists(...input).catch((err) =>
+      expect(err.msg).toBe('not found')
+    );
+  });
+  it('resource exists', () => {
+    const input = ['categories', 'slug', 'euro game'];
+
+    return checkExists(...input).then((res) => {
+      expect(res).toBe(undefined);
+    });
   });
 });

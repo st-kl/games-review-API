@@ -6,7 +6,7 @@ const {
   createRevRef,
 } = require('../db/utils/data-manipulation');
 
-describe('CREATE COLUMN VALUES', () => {
+describe('create column values', () => {
   describe('category data', () => {
     it('returns an empty array when passed empty array', () => {
       expect(createCategoryData([])).toEqual([]);

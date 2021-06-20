@@ -14,8 +14,8 @@ Bear in mind, handling bad inputs from clients doesn't necessarily have to lead 
 - 200 OK
 - 201 Created
 - 204 No Content
-- 400 Bad Request
-- 404 Not Found
+- 400 bad request
+- 404 not found
 - 405 Method Not Allowed
 - 418 I'm a teapot
 - 422 Unprocessable Entity
