@@ -1,6 +1,6 @@
 // undefined path
 exports.handleInvalidPath = (req, res) => {
-  res.status(404).send({ msg: 'not found hello' });
+  res.status(404).send({ msg: 'not found' });
 };
 
 // custom errors
