@@ -149,36 +149,3 @@ exports.selectReviewComments = async (reviewId) => {
   return res.rows;
 };
 
-exports.addComment = async (reviewId, newComment) => {
-  const { username, body } = newComment;
-  const bodyLength = Object.keys(newComment).length;
-
-  // validate request body
-  if (
-    bodyLength !== 2 ||
-    typeof username !== 'string' ||
-    typeof body !== 'string'
-  ) {
-    return Promise.reject({
-      status: 400,
-      msg: 'bad request',
-    });
-  }
-
-  // validate username
-  await checkExists('users', 'username', username);
-
-  const res = await db.query(
-    `
-  INSERT INTO comments
-    (author, review_id, body)
-  VALUES
-    ($1, $2, $3)
-  RETURNING *;
-  
-  `,
-    [username, reviewId, body]
-  );
-
-  return res.rows;
-};

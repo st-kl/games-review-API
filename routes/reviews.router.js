@@ -1,9 +1,9 @@
+const { postComment } = require('../controllers/comments.controllers');
 const {
   getReviews,
   getReviewById,
   patchReviewById,
   getReviewComments,
-  postComment,
 } = require('../controllers/reviews.controllers');
 const reviews = require('../db/data/test-data/reviews');
 const reviewsRouter = require('express').Router();

@@ -469,3 +469,25 @@ describe('UTIL: checkExists', () => {
     });
   });
 });
+
+describe('DELETE /api/comments/:comment_id', () => {
+  it('204: deletes comment from database', () => {
+    return request(app).delete('/api/comments/2').expect(204);
+  });
+  it('404: not found - ID does not exist', () => {
+    return request(app)
+      .delete('/api/comments/30')
+      .expect(404)
+      .then(({ body }) => {
+        expect(body).toEqual({ msg: 'not found' });
+      });
+  });
+  it('400: bad request - ID invalid', () => {
+    return request(app)
+      .delete('/api/comments/elephant')
+      .expect(400)
+      .then(({ body }) => {
+        expect(body).toEqual({ msg: 'bad request' });
+      });
+  });
+});

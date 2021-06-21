@@ -110,6 +110,10 @@ apiInfo = {
       ],
     },
   },
+  'DELETE /api/comments/:comment_id': {
+    description: 'deletes specified comment',
+    queries: [],
+  },
 };
 
 getApiInfo = (req, res, next) => {
