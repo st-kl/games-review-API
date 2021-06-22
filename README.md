@@ -38,5 +38,5 @@ This path contains information about available endpoints and how to interact wit
 
 ## Version Requirements
 - `Node.js`: 16.0.0 or higher
-- `Postgres`: 12.7
+- `Postgres`: 12.7 or higher
 
