@@ -34,7 +34,7 @@ exports.addComment = async (reviewId, newComment) => {
   // validate username
   await checkExists('users', 'username', username);
 
-  const res = await db.query(
+  const result = await db.query(
     `
   INSERT INTO comments
     (author, review_id, body)
@@ -46,5 +46,5 @@ exports.addComment = async (reviewId, newComment) => {
     [username, reviewId, body]
   );
 
-  return res.rows;
+  return result.rows;
 };

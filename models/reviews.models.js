@@ -2,7 +2,7 @@ const db = require('../db/connection');
 const { checkExists } = require('../db/utils/query-check');
 
 exports.selectReviewById = async (reviewId) => {
-  const res = await db.query(
+  const result = await db.query(
     `
   SELECT 
     reviews.*,
@@ -19,13 +19,13 @@ exports.selectReviewById = async (reviewId) => {
     reviews.review_id;`,
     [reviewId]
   );
-  if (res.rows.length === 0) {
+  if (result.rows.length === 0) {
     return Promise.reject({
       status: 404,
       msg: 'not found',
     });
   }
-  return res.rows;
+  return result.rows;
 };
 
 exports.updateReviewById = async (reviewId, inc_votes, bodyLength) => {
@@ -39,23 +39,21 @@ exports.updateReviewById = async (reviewId, inc_votes, bodyLength) => {
 
   // update review
   await db.query(
-    `
-  UPDATE reviews SET votes = votes + $1 WHERE review_id = $2;
-  `,
+    `UPDATE reviews SET votes = votes + $1 WHERE review_id = $2;`,
     [inc_votes, reviewId]
   );
 
   // query to return updated review
-  const res = await db.query(`SELECT * FROM reviews WHERE review_id = $1;`, [
+  const result = await db.query(`SELECT * FROM reviews WHERE review_id = $1;`, [
     reviewId,
   ]);
-  if (res.rows.length === 0) {
+  if (result.rows.length === 0) {
     return Promise.reject({
       status: 404,
       msg: 'not found',
     });
   }
-  return res.rows;
+  return result.rows;
 };
 
 exports.selectReviews = async (
@@ -116,18 +114,18 @@ exports.selectReviews = async (
   queryStr += ` ORDER BY reviews.${sort_by} ${order};`;
 
   // start query
-  const res = await db.query(queryStr, queryValues);
+  const result = await db.query(queryStr, queryValues);
 
-  // validate categories if query returns no results
-  if (res.rows.length === 0) {
+  // validate categories if query returns no result
+  if (result.rows.length === 0) {
     await checkExists('categories', 'slug', category);
   }
 
-  return res.rows;
+  return result.rows;
 };
 
 exports.selectReviewComments = async (reviewId) => {
-  const res = await db.query(
+  const result = await db.query(
     `
   SELECT 
     comment_id,
@@ -142,10 +140,10 @@ exports.selectReviewComments = async (reviewId) => {
     [reviewId]
   );
 
-  if (res.rows.length === 0) {
+  // check if review exists
+  if (result.rows.length === 0) {
     await checkExists('reviews', 'review_id', reviewId);
   }
 
-  return res.rows;
+  return result.rows;
 };
-
