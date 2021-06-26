@@ -923,3 +923,25 @@ describe('POST /api/categories', () => {
       });
   });
 });
+
+describe('DELETE /api/reviews/:review_id', () => {
+  it('204: deletes review from database', () => {
+    return request(app).delete('/api/reviews/2').expect(204);
+  });
+  it('404: not found - ID does not exist', () => {
+    return request(app)
+      .delete('/api/reviews/30')
+      .expect(404)
+      .then(({ body }) => {
+        expect(body).toEqual({ msg: 'not found' });
+      });
+  });
+  it('400: bad request - ID invalid', () => {
+    return request(app)
+      .delete('/api/reviews/elephant')
+      .expect(400)
+      .then(({ body }) => {
+        expect(body).toEqual({ msg: 'bad request' });
+      });
+  });
+});
