@@ -556,6 +556,105 @@ describe('GET /api/users/:username', () => {
   });
 });
 
+describe('PATCH /api/comments/:comment_id', () => {
+  it('200: returns an array with the updated comment object (inc)', () => {
+    return request(app)
+      .patch('/api/comments/6')
+      .send({ inc_votes: 1 })
+      .expect(200)
+      .then(({ body }) => {
+        expect(Array.isArray(body.comments)).toBe(true);
+        expect(body.comments.length).toBe(1);
+        expect(body.comments[0]).toEqual({
+          comment_id: 6,
+          author: 'philippaclaire9',
+          review_id: 3,
+          votes: 11,
+          created_at: '2021-03-27T19:49:48.110Z',
+          body: 'Not sure about dogs, but my cat likes to get involved with board games, the boxes are their particular favourite',
+        });
+      });
+  });
+  it('200: returns an array with the updated comment object (dec)', () => {
+    return request(app)
+      .patch('/api/comments/6')
+      .send({ inc_votes: -1 })
+      .expect(200)
+      .then(({ body }) => {
+        expect(Array.isArray(body.comments)).toBe(true);
+        expect(body.comments.length).toBe(1);
+        expect(body.comments[0]).toEqual({
+          comment_id: 6,
+          author: 'philippaclaire9',
+          review_id: 3,
+          votes: 9,
+          created_at: '2021-03-27T19:49:48.110Z',
+          body: 'Not sure about dogs, but my cat likes to get involved with board games, the boxes are their particular favourite',
+        });
+      });
+  });
+  it('404: not found - ID does not exist', () => {
+    return request(app)
+      .patch('/api/comments/14')
+      .send({ inc_votes: 13 })
+      .expect(404)
+      .then(({ body }) => {
+        expect(body).toEqual({ msg: 'not found' });
+      });
+  });
+  it('400: bad request - invalid ID', () => {
+    return request(app)
+      .patch('/api/comments/elephant')
+      .send({ inc_votes: 13 })
+      .expect(400)
+      .then(({ body }) => {
+        expect(body).toEqual({ msg: 'bad request' });
+      });
+  });
+  it('400: bad request - invalid vote value', () => {
+    return request(app)
+      .patch('/api/comments/2')
+      .send({ inc_votes: 'test' })
+      .expect(400)
+      .then(({ body }) => {
+        expect(body).toEqual({ msg: 'bad request' });
+      });
+  });
+  it('400: bad request - invalid body (wrong key)', () => {
+    return request(app)
+      .patch('/api/comments/2')
+      .send({ inc: 13 })
+      .expect(400)
+      .then(({ body }) => {
+        expect(body).toEqual({
+          msg: 'bad request',
+        });
+      });
+  });
+  it('400: bad request - invalid body (empty body)', () => {
+    return request(app)
+      .patch('/api/comments/2')
+      .send({})
+      .expect(400)
+      .then(({ body }) => {
+        expect(body).toEqual({
+          msg: 'bad request',
+        });
+      });
+  });
+  it('400: bad request - invalid body (too many keys)', () => {
+    return request(app)
+      .patch('/api/comments/2')
+      .send({ inc_votes: 1, name: 'Mitch' })
+      .expect(400)
+      .then(({ body }) => {
+        expect(body).toEqual({
+          msg: 'bad request',
+        });
+      });
+  });
+});
+
 describe('PAGINATION', () => {
   describe('GET /api/reviews', () => {
     it('200: returns only 10 reviews by default', () => {
