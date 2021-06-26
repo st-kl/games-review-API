@@ -202,15 +202,22 @@ exports.selectReviewComments = async (reviewId, limit = 10, page = 1) => {
 };
 
 exports.addReview = async (newReview, bodyLength) => {
-  const { owner, title, review_body, designer, category } = newReview;
-
   // validate request body
-  if (bodyLength !== 5) {
+  if (
+    !bodyCheck(newReview, {
+      owner: 'string',
+      title: 'string',
+      review_body: 'string',
+      designer: 'string',
+      category: 'string',
+    })
+  ) {
     return Promise.reject({
       status: 400,
       msg: 'bad request',
     });
   }
+  const { owner, title, review_body, designer, category } = newReview;
 
   const result = await db.query(
     `

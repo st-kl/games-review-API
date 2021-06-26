@@ -815,46 +815,42 @@ describe('POST /api/reviews', () => {
         title: 'new game',
         review_body: 'review body',
         designer: 'Mario',
+        category: 'hitandrun',
+        body: 'body text',
       })
       .expect(400)
       .then(({ body }) => {
         expect(body).toEqual({ msg: 'bad request' });
       });
   });
-  // it('400: bad request - wrong username data type', () => {
-  //   return request(app)
-  //     .post('/api/reviews')
-  //     .send({ username: 7, body: 'new comment' })
-  //     .expect(400)
-  //     .then(({ body }) => {
-  //       expect(body).toEqual({ msg: 'bad request' });
-  //     });
-  // });
-  // it('400: bad request - wrong body data type', () => {
-  //   return request(app)
-  //     .post('/api/reviews')
-  //     .send({ username: 'bainesface', body: 8 })
-  //     .expect(400)
-  //     .then(({ body }) => {
-  //       expect(body).toEqual({ msg: 'bad request' });
-  //     });
-  // });
-  // it('400: bad request - wrong username key', () => {
-  //   return request(app)
-  //     .post('/api/reviews')
-  //     .send({ user: 'bainesface', body: 'new comment' })
-  //     .expect(400)
-  //     .then(({ body }) => {
-  //       expect(body).toEqual({ msg: 'bad request' });
-  //     });
-  // });
-  // it('400: bad request - wrong body key', () => {
-  //   return request(app)
-  //     .post('/api/reviews')
-  //     .send({ username: 'bainesface', bo: 'new comment' })
-  //     .expect(400)
-  //     .then(({ body }) => {
-  //       expect(body).toEqual({ msg: 'bad request' });
-  //     });
-  // });
+  it('400: bad request - wrong key in body', () => {
+    return request(app)
+      .post('/api/reviews')
+      .send({
+        owner: 'robin',
+        title: 'new game',
+        review_body: 'review body',
+        designer: 'Mario',
+        categories: 'hitandrun',
+      })
+      .expect(400)
+      .then(({ body }) => {
+        expect(body).toEqual({ msg: 'bad request' });
+      });
+  });
+  it('400: bad request - wrong value data type', () => {
+    return request(app)
+      .post('/api/reviews')
+      .send({
+        owner: 'robin',
+        title: 'new game',
+        review_body: 'review body',
+        designer: 'Mario',
+        category: 13,
+      })
+      .expect(400)
+      .then(({ body }) => {
+        expect(body).toEqual({ msg: 'bad request' });
+      });
+  });
 });
