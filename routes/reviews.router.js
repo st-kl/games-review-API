@@ -5,7 +5,6 @@ const {
   patchReviewById,
   getReviewComments,
 } = require('../controllers/reviews.controllers');
-const reviews = require('../db/data/test-data/reviews');
 const reviewsRouter = require('express').Router();
 
 reviewsRouter.route('/').get(getReviews);

@@ -25,17 +25,20 @@ exports.patchReviewById = (req, res, next) => {
 };
 
 exports.getReviews = (req, res, next) => {
-  const { sort_by, order, category } = req.query;
-  selectReviews(sort_by, order, category)
+  const { sort_by, order, category, title, limit, page } = req.query;
+  selectReviews(sort_by, order, category, title, limit, page)
     .then((reviews) => {
-      res.status(200).send({ reviews });
+      res
+        .status(200)
+        .send({ reviews: reviews.rows, total_count: reviews.totalCount });
     })
     .catch(next);
 };
 
 exports.getReviewComments = (req, res, next) => {
   const reviewId = req.params.review_id;
-  selectReviewComments(reviewId)
+  const { limit, page } = req.query;
+  selectReviewComments(reviewId, limit, page)
     .then((comments) => {
       res.status(200).send({ comments });
     })

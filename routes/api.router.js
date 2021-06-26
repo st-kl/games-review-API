@@ -2,6 +2,7 @@ const { getApiInfo } = require('../controllers/api.controllers');
 const categoriesRouter = require('./categories.router');
 const commentsRouter = require('./comments.router');
 const reviewsRouter = require('./reviews.router');
+const usersRouter = require('./users.router');
 const apiRouter = require('express').Router();
 
 apiRouter.get('/', getApiInfo);
@@ -15,3 +16,6 @@ module.exports = apiRouter;
 
 // comments router
 apiRouter.use('/comments', commentsRouter);
+
+// users router
+apiRouter.use('/users', usersRouter);

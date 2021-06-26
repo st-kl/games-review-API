@@ -59,7 +59,10 @@ exports.updateReviewById = async (reviewId, inc_votes, bodyLength) => {
 exports.selectReviews = async (
   sort_by = 'created_at',
   order = 'desc',
-  category
+  category,
+  title,
+  limit = 10,
+  page = 1
 ) => {
   // validate sort_by query
   if (
@@ -74,12 +77,22 @@ exports.selectReviews = async (
       'comment_count',
     ].includes(sort_by)
   ) {
-    return Promise.reject({ status: 400, msg: 'Invalid sort query' });
+    return Promise.reject({ status: 400, msg: 'invalid sort query' });
   }
 
   // validate order query
   if (!['asc', 'desc'].includes(order)) {
-    return Promise.reject({ status: 400, msg: 'Invalid order query' });
+    return Promise.reject({ status: 400, msg: 'invalid order query' });
+  }
+
+  // validate limit query
+  if (isNaN(limit)) {
+    return Promise.reject({ status: 400, msg: 'invalid limit query' });
+  }
+
+  // validate page query
+  if (isNaN(page)) {
+    return Promise.reject({ status: 400, msg: 'invalid page query' });
   }
 
   // query arguments
@@ -107,24 +120,60 @@ exports.selectReviews = async (
     queryStr += ` WHERE reviews.category = $1`;
   }
 
+  // add title to query values if provided and extend query string
+  if (title) {
+    if (queryValues.length) {
+      queryStr += ' AND';
+    } else {
+      queryStr += ' WHERE';
+    }
+    queryValues.push(title);
+    queryStr += ` reviews.title = $${queryValues.length}`;
+  }
+
   // extend query string with group by
   queryStr += ` GROUP BY reviews.review_id`;
 
-  // extend query string with order by
-  queryStr += ` ORDER BY reviews.${sort_by} ${order};`;
+  // query string for totalCount query
+  const totalQueryStr = queryStr.slice();
+
+  // extend query string with order by, limit and offset
+  const offset = limit * (page - 1);
+  queryStr += ` ORDER BY reviews.${sort_by} ${order} LIMIT ${limit} OFFSET ${offset};`;
 
   // start query
   const result = await db.query(queryStr, queryValues);
 
   // validate categories if query returns no result
-  if (result.rows.length === 0) {
+  if (result.rows.length === 0 && category) {
     await checkExists('categories', 'slug', category);
   }
 
-  return result.rows;
+  // validate titles if query returns no result
+  if (result.rows.length === 0 && title) {
+    await checkExists('reviews', 'title', title);
+  }
+
+  // start totalCount query
+  const totalCount = await db.query(totalQueryStr, queryValues);
+  result.totalCount = totalCount.rowCount;
+
+  return result;
 };
 
-exports.selectReviewComments = async (reviewId) => {
+exports.selectReviewComments = async (reviewId, limit = 10, page = 1) => {
+  // validate limit query
+  if (isNaN(limit)) {
+    return Promise.reject({ status: 400, msg: 'invalid limit query' });
+  }
+
+  // validate page query
+  if (isNaN(page)) {
+    return Promise.reject({ status: 400, msg: 'invalid page query' });
+  }
+
+  const offset = limit * (page - 1);
+
   const result = await db.query(
     `
   SELECT 
@@ -136,14 +185,17 @@ exports.selectReviewComments = async (reviewId) => {
   FROM 
     comments
   WHERE
-    review_id = $1;`,
-    [reviewId]
+    review_id = $1
+  LIMIT
+    $2
+  OFFSET
+    $3;`,
+    [reviewId, limit, offset]
   );
 
   // check if review exists
   if (result.rows.length === 0) {
     await checkExists('reviews', 'review_id', reviewId);
   }
-
   return result.rows;
 };
