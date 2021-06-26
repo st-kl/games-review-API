@@ -165,17 +165,6 @@ describe('PATCH /api/reviews/:review_id', () => {
         });
       });
   });
-  it('400: bad request - invalid body (empty body)', () => {
-    return request(app)
-      .patch('/api/reviews/2')
-      .send({})
-      .expect(400)
-      .then(({ body }) => {
-        expect(body).toEqual({
-          msg: 'bad request',
-        });
-      });
-  });
   it('400: bad request - invalid body (too many keys)', () => {
     return request(app)
       .patch('/api/reviews/2')
@@ -631,17 +620,6 @@ describe('PATCH /api/comments/:comment_id', () => {
         });
       });
   });
-  it('400: bad request - invalid body (empty body)', () => {
-    return request(app)
-      .patch('/api/comments/2')
-      .send({})
-      .expect(400)
-      .then(({ body }) => {
-        expect(body).toEqual({
-          msg: 'bad request',
-        });
-      });
-  });
   it('400: bad request - invalid body (too many keys)', () => {
     return request(app)
       .patch('/api/comments/2')
@@ -770,4 +748,113 @@ describe('PAGINATION', () => {
         .then(({ body }) => expect(body.msg).toBe('invalid page query'));
     });
   });
+});
+
+describe('POST /api/reviews', () => {
+  it('201: returns posted comment', () => {
+    return request(app)
+      .post('/api/reviews')
+      .send({
+        owner: 'bainesface',
+        title: 'new game',
+        review_body: 'review body',
+        designer: 'Mario',
+        category: 'euro game',
+      })
+      .expect(201)
+      .then(({ body }) => {
+        expect(Array.isArray(body.reviews)).toBe(true);
+        expect(body.reviews.length).toBe(1);
+        expect(body.reviews[0]).toEqual({
+          review_id: 14,
+          votes: 0,
+          created_at: expect.any(String),
+          owner: 'bainesface',
+          title: 'new game',
+          review_body: 'review body',
+          designer: 'Mario',
+          category: 'euro game',
+        });
+      });
+  });
+  it('404: not found - username does not exist', () => {
+    return request(app)
+      .post('/api/reviews')
+      .send({
+        owner: 'robin',
+        title: 'new game',
+        review_body: 'review body',
+        designer: 'Mario',
+        category: 'euro game',
+      })
+      .expect(404)
+      .then(({ body }) => {
+        expect(body).toEqual({ msg: 'not found' });
+      });
+  });
+  it('404: not found - category does not exist', () => {
+    return request(app)
+      .post('/api/reviews')
+      .send({
+        owner: 'robin',
+        title: 'new game',
+        review_body: 'review body',
+        designer: 'Mario',
+        category: 'hitandrun',
+      })
+      .expect(404)
+      .then(({ body }) => {
+        expect(body).toEqual({ msg: 'not found' });
+      });
+  });
+  it('400: bad request - wrong number of keys in body', () => {
+    return request(app)
+      .post('/api/reviews')
+      .send({
+        owner: 'robin',
+        title: 'new game',
+        review_body: 'review body',
+        designer: 'Mario',
+      })
+      .expect(400)
+      .then(({ body }) => {
+        expect(body).toEqual({ msg: 'bad request' });
+      });
+  });
+  // it('400: bad request - wrong username data type', () => {
+  //   return request(app)
+  //     .post('/api/reviews')
+  //     .send({ username: 7, body: 'new comment' })
+  //     .expect(400)
+  //     .then(({ body }) => {
+  //       expect(body).toEqual({ msg: 'bad request' });
+  //     });
+  // });
+  // it('400: bad request - wrong body data type', () => {
+  //   return request(app)
+  //     .post('/api/reviews')
+  //     .send({ username: 'bainesface', body: 8 })
+  //     .expect(400)
+  //     .then(({ body }) => {
+  //       expect(body).toEqual({ msg: 'bad request' });
+  //     });
+  // });
+  // it('400: bad request - wrong username key', () => {
+  //   return request(app)
+  //     .post('/api/reviews')
+  //     .send({ user: 'bainesface', body: 'new comment' })
+  //     .expect(400)
+  //     .then(({ body }) => {
+  //       expect(body).toEqual({ msg: 'bad request' });
+  //     });
+  // });
+  // it('400: bad request - wrong body key', () => {
+  //   return request(app)
+  //     .post('/api/reviews')
+  //     .send({ username: 'bainesface', bo: 'new comment' })
+  //     .expect(400)
+  //     .then(({ body }) => {
+  //       expect(body).toEqual({ msg: 'bad request' });
+  //     });
+  // });
 });

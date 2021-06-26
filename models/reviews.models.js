@@ -1,5 +1,5 @@
 const db = require('../db/connection');
-const { checkExists } = require('../db/utils/query-check');
+const { checkExists, bodyCheck } = require('../db/utils/query-check');
 
 exports.selectReviewById = async (reviewId) => {
   const result = await db.query(
@@ -28,14 +28,15 @@ exports.selectReviewById = async (reviewId) => {
   return result.rows;
 };
 
-exports.updateReviewById = async (reviewId, inc_votes, bodyLength) => {
+exports.updateReviewById = async (reviewId, newVote) => {
   // validate request body
-  if (!inc_votes || bodyLength !== 1) {
+  if (!bodyCheck(newVote, { inc_votes: 'number' })) {
     return Promise.reject({
       status: 400,
       msg: 'bad request',
     });
   }
+  const { inc_votes } = newVote;
 
   // update review
   await db.query(
@@ -197,5 +198,38 @@ exports.selectReviewComments = async (reviewId, limit = 10, page = 1) => {
   if (result.rows.length === 0) {
     await checkExists('reviews', 'review_id', reviewId);
   }
+  return result.rows;
+};
+
+exports.addReview = async (newReview, bodyLength) => {
+  const { owner, title, review_body, designer, category } = newReview;
+
+  // validate request body
+  if (bodyLength !== 5) {
+    return Promise.reject({
+      status: 400,
+      msg: 'bad request',
+    });
+  }
+
+  const result = await db.query(
+    `
+  INSERT INTO reviews
+    (owner, title, review_body, designer, category)
+  VALUES
+    ($1, $2, $3, $4, $5)
+  RETURNING 
+    owner, 
+    title, 
+    review_body, 
+    designer, 
+    category, 
+    review_id,
+    votes,
+    created_at
+  ;`,
+    [owner, title, review_body, designer, category]
+  );
+
   return result.rows;
 };

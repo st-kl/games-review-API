@@ -5,6 +5,7 @@ const {
   createCommentData,
   createRevRef,
 } = require('../db/utils/data-manipulation');
+const { bodyCheck } = require('../db/utils/query-check');
 
 describe('create column values', () => {
   describe('category data', () => {
@@ -180,5 +181,66 @@ describe('createRevRef', () => {
       { review_id: 8, title: 'Wizzard' },
       { review_id: 13, title: 'BioShock' },
     ]);
+  });
+});
+
+describe('bodyCheck', () => {
+  const target = {
+    owner: 'string',
+    title: 'string',
+    review_body: 'string',
+    designer: 'string',
+    category: 'string',
+  };
+  it('returns true if all keys and values are correct', () => {
+    expect(
+      bodyCheck(
+        {
+          owner: 'robin',
+          title: 'new game',
+          review_body: 'review body',
+          designer: 'Mario',
+          category: 'euro game',
+        },
+        target
+      )
+    ).toBe(true);
+    expect(
+      bodyCheck(
+        {
+          owne: 'robin',
+          title: 'new game',
+          review_body: 'review body',
+          designer: 'Mario',
+          category: 'euro game',
+        },
+        target
+      )
+    ).toBe(false);
+  });
+  it('returns true if amount of keys is correct', () => {
+    expect(
+      bodyCheck(
+        {
+          owner: 'robin',
+          title: 'new game',
+          review_body: 'review body',
+          designer: 'Mario',
+          category: 'euro game',
+        },
+        target
+      )
+    ).toBe(true);
+    expect(
+      bodyCheck(
+        {
+          title: 'new game',
+          review_body: 'review body',
+          designer: 'Mario',
+          category: 'euro game',
+        },
+        target
+      )
+    ).toBe(false);
   });
 });

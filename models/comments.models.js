@@ -1,5 +1,5 @@
 const db = require('../db/connection');
-const { checkExists } = require('../db/utils/query-check');
+const { bodyCheck } = require('../db/utils/query-check');
 
 exports.removeComment = async (commentId) => {
   const result = await db.query(
@@ -16,23 +16,14 @@ exports.removeComment = async (commentId) => {
 };
 
 exports.addComment = async (reviewId, newComment) => {
-  const { username, body } = newComment;
-  const bodyLength = Object.keys(newComment).length;
-
   // validate request body
-  if (
-    bodyLength !== 2 ||
-    typeof username !== 'string' ||
-    typeof body !== 'string'
-  ) {
+  if (!bodyCheck(newComment, { username: 'string', body: 'string' })) {
     return Promise.reject({
       status: 400,
       msg: 'bad request',
     });
   }
-
-  // validate username
-  await checkExists('users', 'username', username);
+  const { username, body } = newComment;
 
   const result = await db.query(
     `
@@ -49,22 +40,23 @@ exports.addComment = async (reviewId, newComment) => {
   return result.rows;
 };
 
-exports.updateCommentById = async (commentId, inc_votes, bodyLength) => {
+exports.updateCommentById = async (commentId, newVote) => {
   // validate request body
-  if (!inc_votes || bodyLength !== 1) {
+  if (!bodyCheck(newVote, { inc_votes: 'number' })) {
     return Promise.reject({
       status: 400,
       msg: 'bad request',
     });
   }
+  const { inc_votes } = newVote;
 
-  // update review
+  // update comment
   await db.query(
     `UPDATE comments SET votes = votes + $1 WHERE comment_id = $2;`,
     [inc_votes, commentId]
   );
 
-  // query to return updated review
+  // query to return updated comment
   const result = await db.query(
     `SELECT * FROM comments WHERE comment_id = $1;`,
     [commentId]

@@ -11,3 +11,15 @@ exports.checkExists = async (table, column, value) => {
     return Promise.reject({ status: 404, msg: 'not found' });
   }
 };
+
+exports.bodyCheck = (body, target) => {
+  Object.keys(body).forEach((key) => {
+    if (!(key in Object.keys(target))) return false;
+  });
+  for (const prop in body) {
+    if (typeof body[prop] !== target[prop]) return false;
+  }
+  if (Object.keys(body).length !== Object.keys(target).length) return false;
+
+  return true;
+};
