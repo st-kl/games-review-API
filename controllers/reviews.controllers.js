@@ -48,8 +48,7 @@ exports.getReviewComments = (req, res, next) => {
 
 exports.postReview = (req, res, next) => {
   const newReview = req.body;
-  const bodyLength = Object.keys(newReview).length;
-  addReview(newReview, bodyLength)
+  addReview(newReview)
     .then((reviews) => res.status(201).send({ reviews }))
     .catch(next);
 };

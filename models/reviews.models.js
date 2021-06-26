@@ -201,7 +201,7 @@ exports.selectReviewComments = async (reviewId, limit = 10, page = 1) => {
   return result.rows;
 };
 
-exports.addReview = async (newReview, bodyLength) => {
+exports.addReview = async (newReview) => {
   // validate request body
   if (
     !bodyCheck(newReview, {

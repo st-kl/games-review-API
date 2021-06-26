@@ -777,7 +777,7 @@ describe('POST /api/reviews', () => {
         });
       });
   });
-  it('404: not found - username does not exist', () => {
+  it('404: not found - owner does not exist', () => {
     return request(app)
       .post('/api/reviews')
       .send({
@@ -847,6 +847,75 @@ describe('POST /api/reviews', () => {
         review_body: 'review body',
         designer: 'Mario',
         category: 13,
+      })
+      .expect(400)
+      .then(({ body }) => {
+        expect(body).toEqual({ msg: 'bad request' });
+      });
+  });
+});
+
+describe('POST /api/categories', () => {
+  it('201: returns posted category', () => {
+    return request(app)
+      .post('/api/categories')
+      .send({
+        slug: 'luck',
+        description: 'Games without strategy',
+      })
+      .expect(201)
+      .then(({ body }) => {
+        expect(Array.isArray(body.categories)).toBe(true);
+        expect(body.categories.length).toBe(1);
+        expect(body.categories[0]).toEqual({
+          slug: 'luck',
+          description: 'Games without strategy',
+        });
+      });
+  });
+  it('400: bad request - category already exists', () => {
+    return request(app)
+      .post('/api/categories')
+      .send({
+        slug: 'dexterity',
+        description: 'Games involving physical skill',
+      })
+      .expect(400)
+      .then(({ body }) => {
+        expect(body).toEqual({ msg: 'bad request' });
+      });
+  });
+  it('400: bad request - wrong number of keys in body', () => {
+    return request(app)
+      .post('/api/categories')
+      .send({
+        slug: 'luck',
+        description: 'Games without strategy',
+        id: 8,
+      })
+      .expect(400)
+      .then(({ body }) => {
+        expect(body).toEqual({ msg: 'bad request' });
+      });
+  });
+  it('400: bad request - wrong key in body', () => {
+    return request(app)
+      .post('/api/categories')
+      .send({
+        slug: 'luck',
+        descriptions: 'Games without strategy',
+      })
+      .expect(400)
+      .then(({ body }) => {
+        expect(body).toEqual({ msg: 'bad request' });
+      });
+  });
+  it('400: bad request - wrong value data type', () => {
+    return request(app)
+      .post('/api/categories')
+      .send({
+        slug: 'luck',
+        description: 20,
       })
       .expect(400)
       .then(({ body }) => {
