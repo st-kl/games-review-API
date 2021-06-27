@@ -2,35 +2,38 @@
 
 ## Description
 
-This is an API to interact with a database that stores various information about board game reviews.
-
-It's a project to mimic the building of a real world back end service which should provide the information to the front end architecture.
+This is an API to give access to board game reviews and related information.
+It's a project to mimic the building of a real world back end service which provides the information to the front end architecture.
 
 A productive version is hosted on Heroku and can be access via
 https://be-nc-games-sk.herokuapp.com/api. \
-The path contains more detailed information about the available endpoints and how to interact with them.
+The `/api` path contains more details about available endpoints and how to interact with them.
 
 ### Tables
 
-- `reviews`
-- `comments`
-- `categories`
-- `users`
+- `reviews`: details about the board game
+- `comments`: comments related to reviews
+- `categories`: board game categories
+- `users`: users who can post comments
 
 ### Endpoints
 
-- `GET /api`
-- `GET /api/categories`
-- `GET /api/reviews`
-- `GET /api/reviews/:review_id`
-- `PATCH /api/reviews/:review_id`
-- `POST /api/reviews/:review_id/comments`
-- `DELETE /api/comments/:comment_id`
+| Endpoint                           | Methods            |
+| ---------------------------------- | ------------------ |
+| `/api `                            | GET                |
+| `/api/reviews`                     | GET, POST          |
+| `/api/reviews/:review_id `         | GET, PATCH, DELETE |
+| `/api/reviews/:review_id/comments` | GET, POST          |
+| `/api/comments/:comment_id`        | PATCH, DELETE      |
+| `/api/categories`                  | GET, POST          |
+| `/api/users`                       | GET                |
+| `/api/users/:username`             | GET                |
+
 
 ### Major Used Packages
 
 - Web Application: `express`
-- Database Interaction: `node postgres`
+- Database Interaction: `node-postgres`
 - Testing: `jest`
 
 ---
@@ -45,7 +48,7 @@ The path contains more detailed information about the available endpoints and ho
 ### Step 2 - Install Dependencies
 
 - in your cloned repo, open a new terminal and run `npm install` to install all packages
-- if you don't need any of the dev dependencies run `npm install --production`
+- if you don't need any of the dev dependencies, run `npm install --production`
 
 ### Step 3 - Define Environment
 

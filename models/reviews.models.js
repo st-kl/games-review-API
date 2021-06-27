@@ -6,7 +6,7 @@ exports.selectReviewById = async (reviewId) => {
     `
   SELECT 
     reviews.*,
-    COUNT(comments.comment_id)::INT
+    COUNT(comments.comment_id)::INT AS comment_count
   FROM 
     reviews
   LEFT JOIN
