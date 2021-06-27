@@ -1,4 +1,3 @@
-const { selectCategories } = require('../models/categories.models');
 const {
   selectReviewById,
   updateReviewById,
