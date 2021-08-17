@@ -1,13 +1,21 @@
-# House of Games API
+# Board Game Review API
 
-## Description
+## Project
 
-This is an API to give access to board game reviews and related information.
-It's a project to mimic the building of a real world back end service which provides the information to the front end architecture.
+This is a RESTful API giving access to board game reviews and related information such as comments and users.\
+It's a project to mimic the building of a real world backend service which provides the information to the frontend architecture.
 
-A productive version is hosted on Heroku and can be access via
+A productive version is hosted on Heroku:\
 https://be-nc-games-sk.herokuapp.com/api. \
+
 The `/api` path contains more details about available endpoints and how to interact with them.
+
+### Highlights
+
+- TDD: All functions, endpoints and related queries were built following the TDD process
+- Error Handling: 400, 404 and 500
+- Routing: each endpoint is accessed using `express` routers
+- MVC: Model-Controller design pattern to handle request using promise chains and `async-await` syntax
 
 ### Tables
 
@@ -28,7 +36,6 @@ The `/api` path contains more details about available endpoints and how to inter
 | `/api/categories`                  | GET, POST          |
 | `/api/users`                       | GET                |
 | `/api/users/:username`             | GET                |
-
 
 ### Major Used Packages
 
